@@ -1,6 +1,7 @@
 const userModel = require("../models/user.model");
 const userService = require("../services/user.service");
 const { validationResult } = require("express-validator");
+const blacklistTokenModel = require("../models/blacklistToken.model");
 
 module.exports.registerUser = async (req, res, next) => {
   const errors = validationResult(req);
@@ -25,14 +26,8 @@ module.exports.registerUser = async (req, res, next) => {
 
     res.status(201).json({ user, token });
   } catch (err) {
-    if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
-      return res
-        .status(400)
-        .json({ message: "This email is already registered. Please log in." });
-    }
 
-    // Log and handle other errors
-    console.error("Error during user registration:", error);
+    console.error("Error during user registration:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -55,5 +50,19 @@ module.exports.loginUser = async (req, res, next) => {
   }
 
   const token = user.generateAuthToken();
+
+  res.cookie('token', token);
+
   res.status(200).json({ user, token });
+};
+
+module.exports.getUserProfile = async (req, res, next) => {
+        res.status(200).json(req.user);
+};
+
+module.exports.logoutUser = async (req, res, next) => {
+    res.clearCookie('token');
+    const token = req.cookies.token || req.headers.authorizaton.split(' ')[0];
+    await blacklistTokenModel.create({token});
+    res.status(200).json({ message: 'Logged out successfully' });
 };

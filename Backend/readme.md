@@ -100,43 +100,83 @@ The request body must include the following fields:
 }
 ```
 
-### Error Responses
+## User Profile Endpoint
 
-#### Validation Errors
-- **Status Code**: `400 Bad Request`
-- **Possible Error Scenarios**:
-  1. Invalid email format
-  2. Password less than 8 characters
+### Overview
+This endpoint allows authenticated users to retrieve their profile information.
 
-#### Authentication Errors
+### Endpoint Details
+- **URL**: `/profile`
+- **Method**: `GET`
+- **Authentication**: Required (JWT Token)
+
+### Request
+#### Headers
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Authorization` | `Bearer <token>` | JWT token received during login |
+OR
+| `Cookie` | `token=<token>` | JWT token stored in cookie |
+
+### Response
+
+#### Successful Profile Retrieval
+- **Status Code**: `200 OK`
+- **Response Body**:
+```json
+{
+  "_id": "uniqueUserID",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "johndoe@example.com"
+}
+```
+
+### Possible Error Responses
 - **Status Code**: `401 Unauthorized`
-- **Possible Error Scenarios**:
-  1. Email not found
-  2. Incorrect password
+  - Invalid or expired token
+  - Token not provided
+  - User not found
 
-#### Example Validation Error Response
+## Logout Endpoint
+
+### Overview
+This endpoint allows authenticated users to log out of the system.
+
+### Endpoint Details
+- **URL**: `/logout`
+- **Method**: `GET`
+- **Authentication**: Required (JWT Token)
+
+### Request
+#### Headers
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Authorization` | `Bearer <token>` | JWT token received during login |
+OR
+| `Cookie` | `token=<token>` | JWT token stored in cookie |
+
+### Response
+
+#### Successful Logout
+- **Status Code**: `200 OK`
+- **Response Body**:
 ```json
 {
-  "errors": [
-    {
-      "msg": "Invalid email",
-      "param": "email",
-      "location": "body"
-    }
-  ]
+  "message": "Logged out successfully"
 }
 ```
 
-#### Example Authentication Error Response
-```json
-{
-  "message": "Invalid email or password"
-}
-```
+### Additional Logout Behavior
+- Clears the authentication token cookie
+- Blacklists the current token (valid for 24 hours)
 
-### Server Errors
-- **Status Code**: `500 Internal Server Error`
-- Returned for unexpected server-side issues
+### Possible Error Responses
+- **Status Code**: `401 Unauthorized`
+  - Invalid or expired token
+  - Token not provided
 
 ## Validation Rules
 - First name (Registration): 
@@ -150,8 +190,10 @@ The request body must include the following fields:
   - Hashed before storage
 - Last name (Registration): Optional, but if provided, minimum 3 characters
 
-## Notes
+## Authentication Notes
 - Passwords are securely hashed before storage
 - A JWT token is generated upon successful login or registration
+- Tokens are valid until logout or expiration
+- Logout invalidates the current token
 - Duplicate email registrations are prevented
 - Login requires exact email and password match
