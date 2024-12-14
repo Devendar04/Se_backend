@@ -9,7 +9,7 @@ module.exports.registerUser = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { fullname, email, password } = req.body;
+  const { fullname, email, password, role } = req.body;
   try {
     console.log(req.body);
 
@@ -20,13 +20,13 @@ module.exports.registerUser = async (req, res, next) => {
       lastname: fullname.lastname,
       email,
       password: hashedPassword,
+      role: role || "student", // Default role to 'student' if not provided
     });
 
     const token = user.generateAuthToken();
 
     res.status(201).json({ user, token });
   } catch (err) {
-
     console.error("Error during user registration:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -51,18 +51,31 @@ module.exports.loginUser = async (req, res, next) => {
 
   const token = user.generateAuthToken();
 
-  res.cookie('token', token);
+  res.cookie("token", token,{
+    httpOnly: true,
+    secure: false,
+  });
 
   res.status(200).json({ user, token });
 };
 
 module.exports.getUserProfile = async (req, res, next) => {
-        res.status(200).json(req.user);
+  const user = req.user;
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.status(200).json({
+    firstname: user.fullname.firstname,
+    lastname: user.fullname.lastname,
+    email: user.email,
+    role: user.role,
+  });
 };
 
 module.exports.logoutUser = async (req, res, next) => {
-    res.clearCookie('token');
-    const token = req.cookies.token || req.headers.authorizaton.split(' ')[0];
-    await blacklistTokenModel.create({token});
-    res.status(200).json({ message: 'Logged out successfully' });
+  res.clearCookie("token");
+  const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+  await blacklistTokenModel.create({ token });
+  res.status(200).json({ message: "Logged out successfully" });
 };

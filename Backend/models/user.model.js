@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    validate: {
+      validator: function (v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      },
+      message: (props) => `${props.value} is not a valid email!`,
+    },
     minlength: [5, "Email must be at least 5 characters long."],
   },
   password: {
@@ -27,16 +33,34 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
+  role: {
+    type: String,
+    enum: ["student", "teacher"],
+    required: true,
+    default: "student", // Default role is student
+  },
+  studentInfo: {
+    class: { type: String }, // Example: "10th Grade"
+    rollNumber: { type: String },
+    parentContact: { type: String },
+  },
+  teacherInfo: {
+    department: { type: String }, // Example: "Mathematics"
+    subjects: [{ type: String }], // Example: ["Algebra", "Geometry"]
+    employeeID: { type: String },
+  },
 });
+
 
 // Token generation method
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
     {
       _id: this._id,
+      role: this.role, // Include role in the token payload
     },
     process.env.JWT_SECRET,
-    { expiresIn: "24h" } // Set token to expire in 24 hours
+    { expiresIn: "24h" }
   );
   return token;
 };
@@ -46,7 +70,7 @@ userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-// Static method to hash password
+// Static method for password hashing
 userSchema.statics.hashPassword = async function (password) {
   return await bcrypt.hash(password, 10);
 };

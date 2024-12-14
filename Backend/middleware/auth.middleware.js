@@ -34,3 +34,13 @@ module.exports.authUser = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized! Token verification failed." });
   }
 };
+
+module.exports.checkRole = (roles) => {
+    return (req, res, next) => {
+      if (!roles.includes(req.user.role)) {
+        return res.status(403).json({ message: "Forbidden: Access is denied." });
+      }
+      next();
+    };
+  };
+  
