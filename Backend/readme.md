@@ -115,7 +115,6 @@ This endpoint allows authenticated users to retrieve their profile information.
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Authorization` | `Bearer <token>` | JWT token received during login |
-OR
 | `Cookie` | `token=<token>` | JWT token stored in cookie |
 
 ### Response
@@ -155,7 +154,6 @@ This endpoint allows authenticated users to log out of the system.
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Authorization` | `Bearer <token>` | JWT token received during login |
-OR
 | `Cookie` | `token=<token>` | JWT token stored in cookie |
 
 ### Response
