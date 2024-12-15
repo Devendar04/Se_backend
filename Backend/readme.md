@@ -176,6 +176,90 @@ This endpoint allows authenticated users to log out of the system.
   - Invalid or expired token
   - Token not provided
 
+## Dashboard Endpoints
+
+### Teacher Dashboard
+- **URL**: `/teacher/dashboard`
+- **Method**: `GET`
+- **Authentication**: Required
+- **Role Required**: `teacher`
+- **Response**: Welcome message for teachers
+
+### Student Dashboard
+- **URL**: `/student/dashboard`
+- **Method**: `GET`
+- **Authentication**: Required
+- **Role Required**: `student`
+- **Response**: Welcome message for students
+
+## Assignment Endpoints
+
+### Create Assignment (Teacher Only)
+- **URL**: `/teacher/assignments`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Role Required**: `teacher`
+- **Content Type**: `multipart/form-data`
+- **File Upload**: Single file allowed (JPEG, PNG, PDF, DOCX)
+
+#### Assignment Model Schema
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | String | Yes | Title of the assignment |
+| `description` | String | Yes | Detailed description of the assignment |
+| `filePath` | String | Yes | Path to the uploaded assignment file |
+| `dueDate` | Date | Yes | Deadline for the assignment |
+| `course` | String | Yes | Course associated with the assignment |
+| `createdAt` | Date | No | Timestamp of assignment creation (defaults to current date) |
+
+#### Example Request Body
+```json
+{
+  "title": "Midterm Project",
+  "description": "Create a comprehensive research paper",
+  "dueDate": "2024-06-15",
+  "course": "Computer Science 101"
+}
+```
+
+### Get Assignments
+- **URL**: `/student/assignments`
+- **Method**: `GET`
+- **Response**: List of all assignments
+
+## Announcement Endpoints
+
+### Create Announcement (Teacher Only)
+- **URL**: `/teacher/announcements`
+- **Method**: `POST`
+- **Authentication**: Required
+- **Role Required**: `teacher`
+- **Content Type**: `multipart/form-data`
+- **File Upload**: Single file allowed (JPEG, PNG, PDF, DOCX)
+
+#### Announcement Model Schema
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | String | Yes | Title of the announcement |
+| `message` | String | Yes | Content of the announcement |
+| `filePath` | String | Yes | Path to the uploaded file |
+| `postedBy` | String | Yes | Name or ID of the teacher posting the announcement |
+| `createdAt` | Date | No | Timestamp of announcement creation (defaults to current date) |
+
+#### Example Request Body
+```json
+{
+  "title": "Upcoming Exam Schedule",
+  "message": "Midterm exams will be held next week",
+  "postedBy": "Prof. Smith"
+}
+```
+
+### Get Announcements
+- **URL**: `/student/announcements`
+- **Method**: `GET`
+- **Response**: List of all announcements
+
 ## Validation Rules
 - First name (Registration): 
   - Minimum 3 characters
@@ -187,6 +271,9 @@ This endpoint allows authenticated users to log out of the system.
   - Minimum 8 characters
   - Hashed before storage
 - Last name (Registration): Optional, but if provided, minimum 3 characters
+- File Uploads:
+  - Allowed types: JPEG, JPG, PNG, PDF, DOCX
+  - Unique filename generated using timestamp
 
 ## Authentication Notes
 - Passwords are securely hashed before storage
@@ -195,3 +282,8 @@ This endpoint allows authenticated users to log out of the system.
 - Logout invalidates the current token
 - Duplicate email registrations are prevented
 - Login requires exact email and password match
+- Role-based access control implemented for dashboard and specific routes
+
+## Middleware
+- Authentication middleware verifies JWT token
+- Role-based middleware checks user roles for protected routes

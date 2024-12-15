@@ -1,11 +1,12 @@
 const Announcement = require('../models/announcement.model');
 
 exports.createAnnouncement = async (data) => {
-  const { title, message, postedBy } = data;
+  const { title, message,filePath, postedBy } = data;
   
   const announcement = new Announcement({
     title,
     message,
+    filePath,
     postedBy,
   });
 
