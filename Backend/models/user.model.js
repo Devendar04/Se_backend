@@ -39,16 +39,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: "student", // Default role is student
   },
-  studentInfo: {
-    class: { type: String }, // Example: "10th Grade"
-    rollNumber: { type: String },
-    parentContact: { type: String },
-  },
-  teacherInfo: {
-    department: { type: String }, // Example: "Mathematics"
-    subjects: [{ type: String }], // Example: ["Algebra", "Geometry"]
-    employeeID: { type: String },
-  },
+  
 });
 
 
