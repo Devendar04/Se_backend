@@ -13,7 +13,7 @@ const AnnouncementController = require('../controllers/announcement.controller')
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, '/public/uploads/'); // Directory where files will be stored
+        cb(null, 'uploads/'); // Directory where files will be stored
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
@@ -85,9 +85,19 @@ router.post(
     '/teacher/assignments',
     authMiddleware.authUser,
     checkRole.checkRole(['teacher']),
-    upload.single('file'),
+    upload.single('filePath'), 
     AssignmentController.createAssignment
 );
+
+router.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        return res.status(400).json({ message: 'Multer error: ' + err.message });
+    }
+    if (err) {
+        return res.status(400).json({ message: 'File upload error: ' + err.message });
+    }
+    next();
+});
 
 router.get(
     '/student/assignments',
@@ -99,7 +109,7 @@ router.post(
     '/teacher/announcements',
     authMiddleware.authUser,
     checkRole.checkRole(['teacher']),
-    upload.single('file'),
+    upload.single('filePath'),
     AnnouncementController.createAnnouncement
 );
 
@@ -107,5 +117,12 @@ router.get(
     '/student/announcements',
     AnnouncementController.getAnnouncements
 );
+// routes/classroom.routes.js
+
+const ClassroomController = require('../controllers/classroom.controller');
+
+router.post('/classrooms', ClassroomController.createClassroom);
+router.get('/classrooms', ClassroomController.getClassrooms); 
+router.get('/classrooms/:accessCode', ClassroomController.getClassroomByAccessCode); 
 
 module.exports = router;
